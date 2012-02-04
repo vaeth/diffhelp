@@ -1,0 +1,10 @@
+#compdef diffhelp
+_arguments -s -S -A '-*' : \
+'-1[insert first arg (ori-dir) as directory name]' \
+'-2[insert second arg (dest-dir) as directory name]' \
+'(-@ -!)-A'[strip all directories]' \
+{'(-A -@)-!+','(-A -!)-@+'}'[NUM (strip NUM directories; default is 1)]:number of dirs to strip:(0 1 2 3 4 5 99)' \
+'-/+[DIR (insert DIR/)]:directory name for inserting:_files -/' \
+'-Nur[typical options for diff]' \
+'1:ori-dir or ori-file or patch-file:_files' \
+'2::new-dir or new-file:_files'

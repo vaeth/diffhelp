@@ -1,0 +1,12 @@
+(C) Martin Väth <martin@mvath.de>
+This project is under the BSD license.
+
+A POSIX script acting as a frontend, beautifier, and path-fixer for diff -u.
+
+Use diffhelp -h to get help.
+
+For installation, copy diffhelp with executable permissions into your path.
+To obtain support for  zsh completion, you can copy the content
+of zsh/ to a directory of zsh's $fpath.
+
+For Gentoo, there is an ebuild in the mv overlay (available by layman).

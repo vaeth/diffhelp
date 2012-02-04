@@ -1,0 +1,138 @@
+#! /usr/bin/env sh
+# (C) Martin Vaeth <martin@mvath.de>
+
+set -f
+
+Usage() {
+	printf '%s\n' \
+"Usage: ${0##*/} [options] -Nur ori-dir new-dir >output.patch
+or:    ${0##*/} [options] -u ori-file new-file >output.patch
+or:    ${0##*/} [options, -0, or -/...] output.patch
+or:    ${0##*/} [options, -0, or -/...] <output.patch >output_new.patch
+
+Call diff for ori-dir and new-dir and beautify the output (changing paths)
+resp. only beautify the output of the existing output.patch.
+In the first two forms all unknown/later options are passed to diff.
+
+To obtain new-dir from ori-dir apply \"patch -p1 <output.patch\"
+To obtain ori-dir from new-dir apply \"patch -R -p1 <output.patch\"
+
+options:
+-h      Show help
+-@ NUM  Strip NUM directories (default is 1); a negative NUM means \"all\"
+-1      Insert directory \"ori-dir/\" (after stripping). This is the default.
+-2      Insert directory \"new-dir/\" (after stripping).
+-0      Do not insert any directory.
+-/ DIR  Insert directory \"DIR/\" (after stripping).
+-A      Shortcut for -0@-1: Strip all directories and insert nothing.
+-! NUM  Same as -@ NUM
+--      Pass remaining options to diff"
+	exit ${1:-1}
+}
+
+num=1
+insert='1'
+while case "${1}" in
+'-'[012Ah!@/]*)
+	curr="${1#-}"
+;;
+'--')
+	shift
+	false
+;;
+*)
+	false
+;;
+esac
+do	optarg=''
+	finish=false
+	while case "${curr}" in
+	'!'*|'@'*)
+		optarg=num;;
+	'0'*)
+		insert='';;
+	'1'*)
+		insert='1';;
+	'2'*)
+		insert='2';;
+	'A'*)
+		num='-1'
+		insert='';;
+	'/'*)
+		insert='d'
+		optarg=insertname;;
+	'h'*)
+		Usage 0;;
+	*)
+		finish=:
+		false;;
+	esac
+	do	curr="${curr#?}"
+		if [ -n "${optarg}" ]
+		then	if [ -z "${curr}" ]
+			then	shift
+				[ ${#} -ge 1 ] || Usage
+				curr="${1}"
+			fi
+			eval "${optarg}=\"\${curr}\""
+			shift
+			break
+		fi
+		if [ -z "${curr}" ]
+		then	shift
+			break
+		fi
+	done
+	if ${finish}
+	then	shift
+		set -- "-${curr}" "${@}"
+		break
+	fi
+done
+my_args='-e '\''/^index /d'\'' \
+	-e '\''/^new file mode /d'\'' \
+	-e '\''/^Index:/d'\'' \
+	-e '\''/^==[= \t]*$/d'\'' \
+	-e '\''/^RCS file:/d'\'' \
+	-e '\''/^retrieving/d'\'' \
+	-e '\''/^diff/d'\'' \
+	-e '\''/^Files .* differ$/d'\'' \
+	-e '\''/^Only in /d'\'' \
+	-e '\''/^Common subdirectories/d'\'' \
+	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)\([^\t]*\).*$!\1\2!'\'
+case "${num:-x}" in
+*[!-0-9]*)	Usage;;
+esac
+if [ ${num} -lt 0 ]
+then	my_args="${my_args}"'\
+	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)\([^/]*/\)*!\1!'\'
+else	while [ ${num} -gt 0 ]
+	do	my_args="${my_args}"'\
+	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)[^/]*/!\1!'\'
+		num=$(( ${num} - 1 ))
+	done
+fi
+if [ -n "${insert}" ]
+then	my_args="${my_args}"'\
+	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)!\1'\''"${insertname}/!" \
+'
+fi
+
+if [ ${#} -le 1 ]
+then	case "${insert}" in
+	1|2)	Usage;;
+	esac
+	if [ ${#} -eq 0 ]
+	then	eval "exec sed ${my_args}"
+	else	! test -d "${1}" || Usage
+		eval "exec sed -i ${my_args} -- \"\${1}\""
+	fi
+	exit 2
+fi
+[ ${#} -ge 2 ] || Usage
+case ${insert} in
+1)	eval "insertname=\"\${$(( ${#} - 1 ))}\"";;
+2)	eval "insertname=\"\${${#}}\"";;
+esac
+export NOCOLOR=1
+diff "${@}" | eval "sed ${my_args}"
