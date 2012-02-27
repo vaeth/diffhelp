@@ -1,5 +1,8 @@
 #! /usr/bin/env sh
-# (C) Martin Vaeth <martin@mvath.de>
+# (C) Martin V\"ath <martin@mvath.de>
+
+unset LC_ALL
+LC_COLLATE=C
 
 set -f
 
@@ -32,7 +35,7 @@ options:
 
 num=1
 insert='1'
-while case "${1}" in
+while case ${1} in
 '-'[012Ah!@/]*)
 	curr="${1#-}"
 ;;
@@ -46,35 +49,35 @@ while case "${1}" in
 esac
 do	optarg=''
 	finish=false
-	while case "${curr}" in
-	'!'*|'@'*)
+	while case ${curr} in
+	[!@]*)
 		optarg=num;;
-	'0'*)
+	0*)
 		insert='';;
-	'1'*)
+	1*)
 		insert='1';;
-	'2'*)
+	2*)
 		insert='2';;
-	'A'*)
+	A*)
 		num='-1'
 		insert='';;
-	'/'*)
+	/*)
 		insert='d'
 		optarg=insertname;;
-	'h'*)
+	h*)
 		Usage 0;;
 	*)
 		finish=:
 		false;;
 	esac
-	do	curr="${curr#?}"
+	do	curr=${curr#?}
 		if [ -n "${optarg}" ]
 		then	if [ -z "${curr}" ]
 			then	shift
 				[ ${#} -ge 1 ] || Usage
-				curr="${1}"
+				curr=${1}
 			fi
-			eval "${optarg}=\"\${curr}\""
+			eval "${optarg}=\${curr}"
 			shift
 			break
 		fi
@@ -100,26 +103,26 @@ my_args='-e '\''/^index /d'\'' \
 	-e '\''/^Only in /d'\'' \
 	-e '\''/^Common subdirectories/d'\'' \
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)\([^\t]*\).*$!\1\2!'\'
-case "${num:-x}" in
+case ${num:-x} in
 *[!-0-9]*)	Usage;;
 esac
 if [ ${num} -lt 0 ]
-then	my_args="${my_args}"'\
+then	my_args=${my_args}'\
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)\([^/]*/\)*!\1!'\'
 else	while [ ${num} -gt 0 ]
-	do	my_args="${my_args}"'\
+	do	my_args=${my_args}'\
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)[^/]*/!\1!'\'
 		num=$(( ${num} - 1 ))
 	done
 fi
 if [ -n "${insert}" ]
-then	my_args="${my_args}"'\
+then	my_args=${my_args}'\
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)!\1'\''"${insertname}/!" \
 '
 fi
 
 if [ ${#} -le 1 ]
-then	case "${insert}" in
+then	case ${insert} in
 	1|2)	Usage;;
 	esac
 	if [ ${#} -eq 0 ]
@@ -131,8 +134,8 @@ then	case "${insert}" in
 fi
 [ ${#} -ge 2 ] || Usage
 case ${insert} in
-1)	eval "insertname=\"\${$(( ${#} - 1 ))}\"";;
-2)	eval "insertname=\"\${${#}}\"";;
+1)	eval "insertname=\${$(( ${#} - 1 ))}";;
+2)	eval "insertname=\${${#}}";;
 esac
 export NOCOLOR=1
 diff "${@}" | eval "sed ${my_args}"
