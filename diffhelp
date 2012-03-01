@@ -50,7 +50,7 @@ esac
 do	optarg=''
 	finish=false
 	while case ${curr} in
-	[!@]*)
+	[@!]*)
 		optarg=num;;
 	0*)
 		insert='';;
