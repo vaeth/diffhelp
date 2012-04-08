@@ -47,20 +47,20 @@ while case ${1} in
 	false
 ;;
 esac
-do	optarg=''
+do	optarg=
 	finish=false
 	while case ${curr} in
 	[@!]*)
 		optarg=num;;
 	0*)
-		insert='';;
+		insert=;;
 	1*)
 		insert='1';;
 	2*)
 		insert='2';;
 	A*)
 		num='-1'
-		insert='';;
+		insert=;;
 	/*)
 		insert='d'
 		optarg=insertname;;
@@ -77,7 +77,7 @@ do	optarg=''
 				[ ${#} -ge 1 ] || Usage
 				curr=${1}
 			fi
-			eval "${optarg}=\${curr}"
+			eval ${optarg}=\${curr}
 			shift
 			break
 		fi
@@ -123,7 +123,7 @@ fi
 
 if [ ${#} -le 1 ]
 then	case ${insert} in
-	1|2)	Usage;;
+	[12])	Usage;;
 	esac
 	if [ ${#} -eq 0 ]
 	then	eval "exec sed ${my_args}"
@@ -134,8 +134,8 @@ then	case ${insert} in
 fi
 [ ${#} -ge 2 ] || Usage
 case ${insert} in
-1)	eval "insertname=\${$(( ${#} - 1 ))}";;
-2)	eval "insertname=\${${#}}";;
+1)	eval insertname=\${$(( ${#} - 1 ))};;
+2)	eval insertname=\${${#}};;
 esac
 export NOCOLOR=1
 diff "${@}" | eval "sed ${my_args}"
