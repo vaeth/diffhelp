@@ -71,8 +71,8 @@ do	optarg=
 		false;;
 	esac
 	do	curr=${curr#?}
-		if [ -n "${optarg}" ]
-		then	if [ -z "${curr}" ]
+		if [ -n "${optarg:++}" ]
+		then	if [ -z "${curr:++}" ]
 			then	shift
 				[ ${#} -ge 1 ] || Usage
 				curr=${1}
@@ -81,7 +81,7 @@ do	optarg=
 			shift
 			break
 		fi
-		if [ -z "${curr}" ]
+		if [ -z "${curr:++}" ]
 		then	shift
 			break
 		fi
@@ -115,7 +115,7 @@ else	while [ ${num} -gt 0 ]
 		num=$(( ${num} - 1 ))
 	done
 fi
-if [ -n "${insert}" ]
+if [ -n "${insert:++}" ]
 then	my_args=${my_args}'\
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)!\1'\''"${insertname}/!" \
 '
