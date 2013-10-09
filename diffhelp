@@ -1,4 +1,4 @@
-#! /usr/bin/env sh
+#!/usr/bin/env sh
 # (C) Martin V\"ath <martin@mvath.de>
 
 unset LC_ALL
@@ -34,18 +34,15 @@ options:
 }
 
 num=1
-insert='1'
+insert=1
 while case ${1} in
 '-'[012Ah!@/]*)
-	curr="${1#-}"
-;;
+	curr=${1#-};;
 '--')
 	shift
-	false
-;;
+	false;;
 *)
-	false
-;;
+	false;;
 esac
 do	optarg=
 	finish=false
@@ -55,14 +52,14 @@ do	optarg=
 	0*)
 		insert=;;
 	1*)
-		insert='1';;
+		insert=1;;
 	2*)
-		insert='2';;
+		insert=2;;
 	A*)
 		num='-1'
 		insert=;;
 	/*)
-		insert='d'
+		insert=d
 		optarg=insertname;;
 	h*)
 		Usage 0;;
@@ -104,7 +101,8 @@ my_args='-e '\''/^index /d'\'' \
 	-e '\''/^Common subdirectories/d'\'' \
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)\([^\t]*\).*$!\1\2!'\'
 case ${num:-x} in
-*[!-0-9]*)	Usage;;
+*[!-0-9]*)
+	Usage;;
 esac
 if [ ${num} -lt 0 ]
 then	my_args=${my_args}'\
@@ -123,7 +121,8 @@ fi
 
 if [ ${#} -le 1 ]
 then	case ${insert} in
-	[12])	Usage;;
+	[12])
+		Usage;;
 	esac
 	if [ ${#} -eq 0 ]
 	then	eval "exec sed ${my_args}"
@@ -134,8 +133,10 @@ then	case ${insert} in
 fi
 [ ${#} -ge 2 ] || Usage
 case ${insert} in
-1)	eval insertname=\${$(( ${#} - 1 ))};;
-2)	eval insertname=\${${#}};;
+1)
+	eval insertname=\${$(( ${#} - 1 ))};;
+2)
+	eval insertname=\${${#}};;
 esac
 export NOCOLOR=1
 diff "${@}" | eval "sed ${my_args}"
