@@ -35,7 +35,7 @@ options:
 
 num=1
 insert=1
-while case ${1} in
+while case $1 in
 '-'[012Ah!@/]*)
 	curr=${1#-};;
 '--')
@@ -46,7 +46,7 @@ while case ${1} in
 esac
 do	optarg=
 	finish=false
-	while case ${curr} in
+	while case $curr in
 	[@!]*)
 		optarg=num;;
 	0*)
@@ -71,10 +71,10 @@ do	optarg=
 		if [ -n "${optarg:++}" ]
 		then	if [ -z "${curr:++}" ]
 			then	shift
-				[ ${#} -ge 1 ] || Usage
-				curr=${1}
+				[ $# -ge 1 ] || Usage
+				curr=$1
 			fi
-			eval ${optarg}=\${curr}
+			eval $optarg=\$curr
 			shift
 			break
 		fi
@@ -83,9 +83,9 @@ do	optarg=
 			break
 		fi
 	done
-	if ${finish}
+	if $finish
 	then	shift
-		set -- "-${curr}" "${@}"
+		set -- "-$curr" "$@"
 		break
 	fi
 done
@@ -104,39 +104,39 @@ case ${num:-x} in
 *[!-0-9]*)
 	Usage;;
 esac
-if [ ${num} -lt 0 ]
-then	my_args=${my_args}'\
+if [ $num -lt 0 ]
+then	my_args=$my_args'\
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)\([^/]*/\)*!\1!'\'
-else	while [ ${num} -gt 0 ]
-	do	my_args=${my_args}'\
+else	while [ $num -gt 0 ]
+	do	my_args=$my_args'\
 	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)[^/]*/!\1!'\'
-		num=$(( ${num} - 1 ))
+		num=$(( $num - 1 ))
 	done
 fi
 if [ -n "${insert:++}" ]
-then	my_args=${my_args}'\
-	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)!\1'\''"${insertname}/!" \
+then	my_args=$my_args'\
+	-e '\''s!^\([\+\-][\+\-][\+\-][ \t]*\)!\1'\''"$insertname/!" \
 '
 fi
 
-if [ ${#} -le 1 ]
-then	case ${insert} in
+if [ $# -le 1 ]
+then	case $insert in
 	[12])
 		Usage;;
 	esac
-	if [ ${#} -eq 0 ]
-	then	eval "exec sed ${my_args}"
-	else	! test -d "${1}" || Usage
-		eval "exec sed -i ${my_args} -- \"\${1}\""
+	if [ $# -eq 0 ]
+	then	eval "exec sed $my_args"
+	else	! test -d "$1" || Usage
+		eval "exec sed -i $my_args -- \"\$1\""
 	fi
 	exit 2
 fi
-[ ${#} -ge 2 ] || Usage
-case ${insert} in
+[ $# -ge 2 ] || Usage
+case $insert in
 1)
-	eval insertname=\${$(( ${#} - 1 ))};;
+	eval insertname=\${$(( $# - 1 ))};;
 2)
-	eval insertname=\${${#}};;
+	eval insertname=\${$#};;
 esac
 export NOCOLOR=1
-diff "${@}" | eval "sed ${my_args}"
+diff "$@" | eval "sed $my_args"
