@@ -3,7 +3,7 @@
 
 unset LC_ALL
 LC_COLLATE=C
-
+set -u
 set -f
 
 Usage() {
@@ -35,7 +35,7 @@ options:
 
 num=1
 insert=1
-while case $1 in
+while case ${1-} in
 '-'[012Ah!@/]*)
 	curr=${1#-};;
 '--')
