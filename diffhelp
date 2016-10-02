@@ -138,5 +138,4 @@ case $insert in
 2)
 	eval insertname=\${$#};;
 esac
-export NOCOLOR=1
-diff "$@" | eval "sed $my_args"
+NOCOLOR=1 diff ${1+"$@"} | eval "sed $my_args"
